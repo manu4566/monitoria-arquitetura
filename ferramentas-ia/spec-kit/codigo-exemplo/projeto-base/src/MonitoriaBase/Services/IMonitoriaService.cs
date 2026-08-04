@@ -9,4 +9,6 @@ public interface IMonitoriaService
     IReadOnlyList<Exercise> GetExercises();
     ExerciseAttempt MarkExerciseAsCompleted(Guid studentId, Guid exerciseId);
     IReadOnlyList<ExerciseAttempt> GetStudentProgress(Guid studentId);
+    ExerciseAttempt? GetExerciseAttempt(Guid attemptId);
+    void UpdateExerciseAttemptStatus(Guid attemptId, string status);
 }

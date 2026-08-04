@@ -42,6 +42,18 @@ public class MonitoriaService : IMonitoriaService
     public IReadOnlyList<ExerciseAttempt> GetStudentProgress(Guid studentId) =>
         _attempts.Where(a => a.StudentId == studentId).ToList().AsReadOnly();
 
+    public ExerciseAttempt? GetExerciseAttempt(Guid attemptId) =>
+        _attempts.FirstOrDefault(a => a.Id == attemptId);
+
+    public void UpdateExerciseAttemptStatus(Guid attemptId, string status)
+    {
+        var attempt = _attempts.FirstOrDefault(a => a.Id == attemptId);
+        if (attempt == null)
+            throw new ArgumentException($"ExerciseAttempt {attemptId} not found.");
+
+        attempt.Status = status;
+    }
+
     private void SeedExercises()
     {
         var exercises = new[]
