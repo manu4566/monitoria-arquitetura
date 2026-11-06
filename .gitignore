@@ -24,3 +24,5 @@ bin/
 obj/
 out/
 *.log
+# Claude Code - permissoes locais
+.claude/settings.local.json

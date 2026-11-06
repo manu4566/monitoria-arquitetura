@@ -1,0 +1,63 @@
+# templates/jobs/build-job.yml
+parameters:
+- name: vmImage
+  type: string
+  default: 'ubuntu-latest'
+- name: buildConfiguration
+  type: string
+  default: 'Release'
+- name: dotnetVersion
+  type: string
+  default: '6.x'
+- name: projects
+  type: string
+  default: '**/*.csproj'
+- name: testProjects
+  type: string
+  default: '**/*Tests.csproj'
+- name: publishProjects
+  type: string
+  default: ''
+- name: artifactName
+  type: string
+  default: 'drop'
+
+jobs:
+- job: Build
+  displayName: 'Build and Test'
+  pool:
+    vmImage: ${{ parameters.vmImage }}
+
+  steps:
+  # Build steps
+  - template: ../steps/dotnet-build.yml
+    parameters:
+      buildConfiguration: ${{ parameters.buildConfiguration }}
+      projects: ${{ parameters.projects }}
+      dotnetVersion: ${{ parameters.dotnetVersion }}
+
+  # Test steps
+  - template: ../steps/dotnet-test.yml
+    parameters:
+      buildConfiguration: ${{ parameters.buildConfiguration }}
+      testProjects: ${{ parameters.testProjects }}
+      collectCoverage: true
+      coverageThreshold: 80
+
+  # Publish steps (if specified)
+  - ${{ if ne(parameters.publishProjects, '') }}:
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Application'
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: ${{ parameters.publishProjects }}
+        arguments: '--configuration ${{ parameters.buildConfiguration }} --output $(Build.ArtifactStagingDirectory)'
+        zipAfterPublish: true
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Pipeline Artifact'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifactName: ${{ parameters.artifactName }}
+        publishLocation: 'pipeline'

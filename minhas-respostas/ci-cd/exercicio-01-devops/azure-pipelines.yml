@@ -1,0 +1,75 @@
+# Pipeline básico para .NET Web API
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - src/*
+
+variables:
+  buildConfiguration: 'Release'
+  vmImageName: 'ubuntu-latest'
+
+pool:
+  vmImage: $(vmImageName)
+
+steps:
+# Instalar .NET SDK
+- task: UseDotNet@2
+  displayName: 'Install .NET 6 SDK'
+  inputs:
+    version: '6.x'
+    performMultiLevelLookup: true
+
+# Restaurar dependências
+- task: DotNetCoreCLI@2
+  displayName: 'Restore NuGet packages'
+  inputs:
+    command: 'restore'
+    projects: 'src/**/*.csproj'
+    feedsToUse: 'select'
+
+# Build da aplicação
+- task: DotNetCoreCLI@2
+  displayName: 'Build application'
+  inputs:
+    command: 'build'
+    projects: 'src/**/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-restore'
+
+# Executar testes
+- task: DotNetCoreCLI@2
+  displayName: 'Run unit tests'
+  inputs:
+    command: 'test'
+    projects: 'src/**/*Tests.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --logger trx --collect "Code coverage"'
+
+# Publicar resultados dos testes
+- task: PublishTestResults@2
+  displayName: 'Publish test results'
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '**/*.trx'
+    mergeTestResults: true
+    failTaskOnFailedTests: true
+  condition: succeededOrFailed()
+
+# Publicar aplicação
+- task: DotNetCoreCLI@2
+  displayName: 'Publish application'
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: 'src/WebApi/WebApi.csproj'
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: true
+
+# Publicar artefatos
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish build artifacts'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'WebApi-$(Build.BuildNumber)'
+    publishLocation: 'Container'

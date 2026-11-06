@@ -1,0 +1,56 @@
+# templates/stages/deploy-stage.yml
+parameters:
+- name: environment
+  type: string
+- name: stageName
+  type: string
+- name: displayName
+  type: string
+- name: dependsOn
+  type: object
+  default: []
+- name: condition
+  type: string
+  default: 'succeeded()'
+- name: vmImage
+  type: string
+  default: 'ubuntu-latest'
+- name: azureServiceConnection
+  type: string
+- name: appName
+  type: string
+- name: artifactName
+  type: string
+  default: 'drop'
+- name: slotName
+  type: string
+  default: ''
+- name: smokeTestEndpoint
+  type: string
+  default: ''
+- name: deploymentStrategy
+  type: string
+  default: 'runOnce'
+  values:
+  - runOnce
+  - rolling
+  - canary
+
+stages:
+- stage: ${{ parameters.stageName }}
+  displayName: ${{ parameters.displayName }}
+  ${{ if ne(length(parameters.dependsOn), 0) }}:
+    dependsOn: ${{ parameters.dependsOn }}
+  condition: ${{ parameters.condition }}
+
+  jobs:
+  - template: ../jobs/deploy-job.yml
+    parameters:
+      vmImage: ${{ parameters.vmImage }}
+      environment: ${{ parameters.environment }}
+      azureServiceConnection: ${{ parameters.azureServiceConnection }}
+      appName: ${{ parameters.appName }}
+      artifactName: ${{ parameters.artifactName }}
+      slotName: ${{ parameters.slotName }}
+      smokeTestEndpoint: ${{ parameters.smokeTestEndpoint }}
+      deploymentStrategy: ${{ parameters.deploymentStrategy }}

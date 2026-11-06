@@ -1,0 +1,53 @@
+# templates/stages/build-stage.yml
+parameters:
+- name: vmImage
+  type: string
+  default: 'ubuntu-latest'
+- name: buildConfiguration
+  type: string
+  default: 'Release'
+- name: stageName
+  type: string
+  default: 'Build'
+- name: displayName
+  type: string
+  default: 'Build and Test'
+- name: dotnetVersion
+  type: string
+  default: '6.x'
+- name: projects
+  type: string
+  default: '**/*.csproj'
+- name: testProjects
+  type: string
+  default: '**/*Tests.csproj'
+- name: publishProjects
+  type: string
+  default: ''
+- name: artifactName
+  type: string
+  default: 'drop'
+- name: dependsOn
+  type: object
+  default: []
+- name: condition
+  type: string
+  default: 'succeeded()'
+
+stages:
+- stage: ${{ parameters.stageName }}
+  displayName: ${{ parameters.displayName }}
+  ${{ if ne(length(parameters.dependsOn), 0) }}:
+    dependsOn: ${{ parameters.dependsOn }}
+  condition: ${{ parameters.condition }}
+
+  jobs:
+  - template: ../jobs/build-job.yml
+    parameters:
+      vmImage: ${{ parameters.vmImage }}
+      buildConfiguration: ${{ parameters.buildConfiguration }}
+      dotnetVersion: ${{ parameters.dotnetVersion }}
+      projects: ${{ parameters.projects }}
+      testProjects: ${{ parameters.testProjects }}
+      publishProjects: ${{ parameters.publishProjects }}
+      artifactName: ${{ parameters.artifactName }}

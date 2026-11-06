@@ -1,0 +1,58 @@
+# azure-pipelines-templates.yml
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - src/*
+
+variables:
+- name: buildConfiguration
+  value: 'Release'
+- name: azureServiceConnection
+  value: 'Azure-Pipeline-Demo'
+- name: webAppNameDev
+  value: 'webapp-demo-dev'
+- name: webAppNameProd
+  value: 'webapp-demo-prod'
+
+stages:
+# Build Stage
+- template: templates/stages/build-stage.yml
+  parameters:
+    stageName: 'Build'
+    displayName: 'Build and Test Application'
+    vmImage: 'ubuntu-latest'
+    buildConfiguration: $(buildConfiguration)
+    dotnetVersion: '6.x'
+    projects: 'src/**/*.csproj'
+    testProjects: 'src/**/*Tests.csproj'
+    publishProjects: 'src/WebApi/WebApi.csproj'
+    artifactName: 'WebApi'
+
+# Deploy to Development
+- template: templates/stages/deploy-stage.yml
+  parameters:
+    stageName: 'DeployDev'
+    displayName: 'Deploy to Development'
+    environment: 'development'
+    dependsOn: ['Build']
+    condition: succeeded()
+    azureServiceConnection: $(azureServiceConnection)
+    appName: $(webAppNameDev)
+    artifactName: 'WebApi'
+    smokeTestEndpoint: 'WeatherForecast'
+
+# Deploy to Production
+- template: templates/stages/deploy-stage.yml
+  parameters:
+    stageName: 'DeployProd'
+    displayName: 'Deploy to Production'
+    environment: 'production'
+    dependsOn: ['DeployDev']
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    azureServiceConnection: $(azureServiceConnection)
+    appName: $(webAppNameProd)
+    artifactName: 'WebApi'
+    smokeTestEndpoint: 'WeatherForecast'

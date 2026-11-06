@@ -1,0 +1,35 @@
+# templates/steps/dotnet-build.yml
+parameters:
+- name: buildConfiguration
+  type: string
+  default: 'Release'
+- name: projects
+  type: string
+  default: '**/*.csproj'
+- name: dotnetVersion
+  type: string
+  default: '6.x'
+- name: restoreProjects
+  type: string
+  default: '**/*.csproj'
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK ${{ parameters.dotnetVersion }}'
+  inputs:
+    version: ${{ parameters.dotnetVersion }}
+    performMultiLevelLookup: true
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore NuGet packages'
+  inputs:
+    command: 'restore'
+    projects: ${{ parameters.restoreProjects }}
+    feedsToUse: 'select'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build ${{ parameters.buildConfiguration }}'
+  inputs:
+    command: 'build'
+    projects: ${{ parameters.projects }}
+    arguments: '--configuration ${{ parameters.buildConfiguration }} --no-restore'

@@ -1,0 +1,81 @@
+# templates/steps/azure-deploy.yml
+parameters:
+- name: azureServiceConnection
+  type: string
+- name: appName
+  type: string
+- name: environment
+  type: string
+  default: 'development'
+- name: slotName
+  type: string
+  default: ''
+- name: artifactName
+  type: string
+  default: 'drop'
+- name: performSmokeTest
+  type: boolean
+  default: true
+- name: smokeTestEndpoint
+  type: string
+  default: ''
+
+steps:
+- task: DownloadPipelineArtifact@2
+  displayName: 'Download Build Artifacts'
+  inputs:
+    buildType: 'current'
+    artifactName: ${{ parameters.artifactName }}
+    targetPath: '$(Pipeline.Workspace)/${{ parameters.artifactName }}'
+
+- task: AzureWebApp@1
+  displayName: 'Deploy to Azure App Service'
+  inputs:
+    azureSubscription: ${{ parameters.azureServiceConnection }}
+    appType: 'webApp'
+    appName: ${{ parameters.appName }}
+    ${{ if ne(parameters.slotName, '') }}:
+      slotName: ${{ parameters.slotName }}
+    package: '$(Pipeline.Workspace)/${{ parameters.artifactName }}/**/*.zip'
+    deploymentMethod: 'auto'
+
+- ${{ if parameters.performSmokeTest }}:
+  - task: PowerShell@2
+    displayName: 'Smoke Test - ${{ parameters.environment }}'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $appName = "${{ parameters.appName }}"
+        $slotName = "${{ parameters.slotName }}"
+        $endpoint = "${{ parameters.smokeTestEndpoint }}"
+
+        if ($slotName -ne "") {
+            $url = "https://$appName-$slotName.azurewebsites.net"
+        } else {
+            $url = "https://$appName.azurewebsites.net"
+        }
+
+        if ($endpoint -ne "") {
+            $url = "$url/$endpoint"
+        }
+
+        Write-Host "Testing endpoint: $url"
+
+        $maxRetries = 5
+        $delay = 10
+
+        for ($i = 1; $i -le $maxRetries; $i++) {
+            try {
+                $response = Invoke-RestMethod -Uri $url -Method Get -TimeoutSec 30
+                Write-Host "✅ Smoke test passed on attempt $i"
+                Write-Host "Response: $($response | ConvertTo-Json -Depth 2)"
+                break
+            } catch {
+                Write-Warning "❌ Attempt $i failed: $($_.Exception.Message)"
+                if ($i -eq $maxRetries) {
+                    Write-Error "Smoke test failed after $maxRetries attempts"
+                    exit 1
+                }
+                Start-Sleep -Seconds $delay
+            }
+        }

@@ -1,0 +1,215 @@
+# Pipeline multi-stage para .NET Web API (SIMULADO - SEM RECURSOS AZURE)
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - src/*
+
+variables:
+  buildConfiguration: 'Release'
+  vmImageName: 'ubuntu-latest'
+  majorVersion: '1'
+  minorVersion: '0'
+  patchVersion: $[counter(format('{0}.{1}', variables['majorVersion'], variables['minorVersion']), 0)]
+  version: '$(majorVersion).$(minorVersion).$(patchVersion)'
+
+stages:
+# ===== BUILD STAGE =====
+- stage: Build
+  displayName: '🏗️ Build and Test'
+  jobs:
+  - job: BuildJob
+    displayName: 'Build Application'
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: UseDotNet@2
+      displayName: '📦 Install .NET 6 SDK'
+      inputs:
+        version: '6.x'
+        performMultiLevelLookup: true
+
+    - task: DotNetCoreCLI@2
+      displayName: '🔄 Restore packages'
+      inputs:
+        command: 'restore'
+        projects: 'src/**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: '🏗️ Build application'
+      inputs:
+        command: 'build'
+        projects: 'src/**/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-restore'
+
+    - task: DotNetCoreCLI@2
+      displayName: '🧪 Run unit tests'
+      inputs:
+        command: 'test'
+        projects: 'src/**/*Tests.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-build --logger trx --collect "Code coverage"'
+
+    - task: PublishTestResults@2
+      displayName: '📊 Publish test results'
+      inputs:
+        testResultsFormat: 'VSTest'
+        testResultsFiles: '**/*.trx'
+        mergeTestResults: true
+        failTaskOnFailedTests: true
+      condition: succeededOrFailed()
+
+    - task: DotNetCoreCLI@2
+      displayName: '📦 Publish application'
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: 'src/WebApi/WebApi.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) --no-build'
+        zipAfterPublish: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: '📤 Publish artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'WebApi-v$(version)'
+        publishLocation: 'Container'
+
+# ===== CODE QUALITY STAGE =====
+- stage: CodeQuality
+  displayName: '🔍 Code Quality'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: QualityGates
+    displayName: 'Quality Gates'
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Install .NET 6 SDK'
+      inputs:
+        version: '6.x'
+        performMultiLevelLookup: true
+
+    - script: |
+        echo "🔍 Running static code analysis..."
+        echo "Checking code coverage..."
+        echo "Validating security rules..."
+        echo "✅ All quality gates passed!"
+      displayName: '🔍 Simulate Code Analysis'
+
+    - script: |
+        echo "📢 Quality Report:"
+        echo "- Code Coverage: 85%"
+        echo "- Security Issues: 0"
+        echo "- Code Smells: 2 minor"
+        echo "- Maintainability: A"
+      displayName: '📊 Quality Report'
+
+# ===== DEPLOY TO DEV STAGE =====
+- stage: DeployDev
+  displayName: '🚀 Deploy to Development'
+  dependsOn:
+  - Build
+  - CodeQuality
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: DeployToDevJob
+    displayName: 'Deploy to Dev Environment'
+    environment: 'development'
+    pool:
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: |
+              echo "🚀 Starting deployment to DEVELOPMENT..."
+              echo "Environment: Development"
+              echo "Version: $(version)"
+              echo "Artifact: WebApi-v$(version)"
+            displayName: '📋 Deployment Info'
+
+          - script: |
+              echo "📦 Downloading artifacts..."
+              sleep 2
+              echo "🔄 Extracting application..."
+              sleep 1
+              echo "⚙️ Configuring application..."
+              sleep 1
+              echo "🚀 Starting application..."
+              sleep 2
+              echo "✅ Deployment to Development completed successfully!"
+            displayName: '🚀 Simulate Deployment'
+
+          - script: |
+              echo "🧪 Running smoke tests..."
+              echo "Testing health endpoint..."
+              echo "Testing API endpoints..."
+              echo "✅ All smoke tests passed!"
+            displayName: '🧪 Smoke Tests'
+
+          - script: |
+              echo "📢 Deployment Summary:"
+              echo "Environment: Development"
+              echo "Status: SUCCESS"
+              echo "URL: https://webapp-demo-dev.azurewebsites.net (simulated)"
+              echo "Deployed at: $(date)"
+            displayName: '📊 Deployment Summary'
+
+# ===== DEPLOY TO PROD STAGE =====
+- stage: DeployProd
+  displayName: '🎆 Deploy to Production'
+  dependsOn: DeployDev
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: DeployToProdJob
+    displayName: 'Deploy to Production Environment'
+    environment: 'production'
+    pool:
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: |
+              echo "🎆 Starting deployment to PRODUCTION..."
+              echo "Environment: Production"
+              echo "Version: $(version)"
+              echo "This deployment requires manual approval!"
+            displayName: '📋 Production Deployment Info'
+
+          - script: |
+              echo "📦 Downloading production-ready artifacts..."
+              sleep 3
+              echo "🔄 Extracting application..."
+              sleep 2
+              echo "⚙️ Applying production configuration..."
+              sleep 2
+              echo "🔐 Setting up security..."
+              sleep 1
+              echo "🚀 Starting production deployment..."
+              sleep 3
+              echo "✅ Deployment to Production completed successfully!"
+            displayName: '🎆 Simulate Production Deployment'
+
+          - script: |
+              echo "🧪 Running comprehensive tests..."
+              echo "Testing all API endpoints..."
+              echo "Validating performance..."
+              echo "Checking security..."
+              echo "Verifying integrations..."
+              echo "✅ All production tests passed!"
+            displayName: '🧪 Production Tests'
+
+          - script: |
+              echo "🎆 PRODUCTION DEPLOYMENT SUMMARY:"
+              echo "Environment: Production"
+              echo "Status: SUCCESS"
+              echo "URL: https://webapp-demo-prod.azurewebsites.net (simulated)"
+              echo "Version: $(version)"
+              echo "Deployed at: $(date)"
+              echo "🎉 Application is now live!"
+            displayName: '🎉 Production Summary'

@@ -1,0 +1,48 @@
+# templates/jobs/deploy-job.yml
+parameters:
+- name: vmImage
+  type: string
+  default: 'ubuntu-latest'
+- name: environment
+  type: string
+- name: azureServiceConnection
+  type: string
+- name: appName
+  type: string
+- name: artifactName
+  type: string
+  default: 'drop'
+- name: slotName
+  type: string
+  default: ''
+- name: smokeTestEndpoint
+  type: string
+  default: ''
+- name: deploymentStrategy
+  type: string
+  default: 'runOnce'
+  values:
+  - runOnce
+  - rolling
+  - canary
+
+jobs:
+- deployment: Deploy
+  displayName: 'Deploy to ${{ parameters.environment }}'
+  environment: ${{ parameters.environment }}
+  pool:
+    vmImage: ${{ parameters.vmImage }}
+
+  strategy:
+    ${{ parameters.deploymentStrategy }}:
+      deploy:
+        steps:
+        - template: ../steps/azure-deploy.yml
+          parameters:
+            azureServiceConnection: ${{ parameters.azureServiceConnection }}
+            appName: ${{ parameters.appName }}
+            environment: ${{ parameters.environment }}
+            slotName: ${{ parameters.slotName }}
+            artifactName: ${{ parameters.artifactName }}
+            performSmokeTest: true
+            smokeTestEndpoint: ${{ parameters.smokeTestEndpoint }}
