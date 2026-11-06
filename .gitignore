@@ -1,6 +1,9 @@
 # Claude Code configuration
 CLAUDE.md
 
+# Gabaritos da monitoria — nao versionar, uso interno
+GABARITO*.md
+
 # IDE and Editor files
 .vscode/
 .idea/

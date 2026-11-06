@@ -15,7 +15,11 @@ monitoria_arquitetura/
 │   ├── 🎯 exercicios/
 │   └── 💻 codigo-exemplo/
 ├── 🤖 ferramentas-ia/          # Ferramentas de IA para Desenvolvimento
-│   └── 🔧 spec-kit/            # Spec-Driven Development com Copilot
+│   ├── 🔧 spec-kit/            # Spec-Driven Development com Copilot
+│   └── 🧰 harness-engineering/ # Guides, sensores e hooks
+│       ├── guides/
+│       ├── sensores/
+│       └── hooks/
 ├── 🔧 microservicos/           # Arquitetura de Microserviços (em breve)
 ├── ☁️ cloud/                   # Arquitetura em Nuvem (em breve)
 └── 📊 observabilidade/         # Monitoring e Observabilidade (em breve)
@@ -47,16 +51,20 @@ monitoria_arquitetura/
 - 🎨 **Decorator** - Funcionalidades dinâmicas
 - 👁️ **Observer** - Sistema de notificações
 
-### 🤖 3. Ferramentas de IA — spec-kit com GitHub Copilot
-- **📖 Documentação**: Fundamentos do SDD, guia prático, boas práticas e referências
-- **🎯 Exercícios**: Instalação, especificação de features e ciclo completo SDD
-- **💻 Artefatos de Exemplo**: spec.md, plan.md e tasks.md prontos para referência
+### 🤖 3. Ferramentas de IA — spec-kit e Harness Engineering
+- **📖 Documentação**: Fundamentos do SDD (spec-kit) e de Guides/Sensores/Hooks (Harness Engineering)
+- **🎯 Exercícios**: Instalação e ciclo completo SDD; auditoria, escrita e implementação de guides, sensores e hooks
+- **💻 Artefatos de Exemplo**: spec.md/plan.md/tasks.md (spec-kit); CLAUDE.md, fitness function e settings.json com hooks (Harness Engineering)
 
 **✨ Destaques:**
 - 📐 **Spec-Driven Development** - Especificação antes de implementação
 - 🔧 **spec-kit** - Toolkit open-source com slash commands para Copilot
 - 💡 **Boas Práticas** - Como escrever specs de qualidade e evitar armadilhas
 - 🔄 **Ciclo completo** - Do requisito vago ao código implementado
+- 🧰 **Harness Engineering** - O que compõe um agente de IA além do modelo
+- 🧭 **Guides** - Direcionando o agente antes de agir
+- 🔍 **Sensores** - Autocorreção via feedback (testes, lint, fitness functions)
+- 🪝 **Hooks** - Conectando tudo ao ciclo de vida do agente
 
 ### 🚀 Próximos Tópicos
 - 🔧 **Arquitetura de Microserviços** - Design e implementação
@@ -112,6 +120,25 @@ monitoria_arquitetura/
    - 📐 Spec completa com critérios de aceite mensuráveis
    - 🏗️ Plan técnico com decisões justificadas
    - 📋 Tasks ordenadas por dependência com critérios de conclusão
+
+### 📖 Para Estudar Harness Engineering:
+
+Estude as 3 subdivisões na ordem **Guides → Sensores → Hooks** — o exercício final de `hooks/` reaproveita os artefatos criados nas outras duas.
+
+1. **📚 Comece pela documentação** em `ferramentas-ia/harness-engineering/{guides,sensores,hooks}/documentacao/`:
+   - 🧭 `guides/` - O que é um guide, hierarquia de `CLAUDE.md`, como escrever guides eficazes
+   - 🔍 `sensores/` - O que é um sensor, dimensões (Computational/Inferential) e categorias de regulação (Architecture Fitness em destaque)
+   - 🪝 `hooks/` - Hooks como mecanismo, Permissions como portão estático, hooks em outros harnesses (git hooks, CI/CD)
+
+2. **🎯 Pratique com os exercícios** em `ferramentas-ia/harness-engineering/{guides,sensores,hooks}/exercicios/`:
+   - 🟢 **Guides**: auditar guides existentes (30-45 min) → escrever um `CLAUDE.md` completo (60-90 min)
+   - 🟢🔴 **Sensores**: catalogar sensores existentes (30-45 min) → implementar uma fitness function de arquitetura (90-120 min)
+   - 🟢🟡🔴 **Hooks**: primeiro hook simples (30-45 min) → hook como guide (60-90 min) → hook como sensor, fechando o ciclo (90-120 min)
+
+3. **💻 Use os artefatos de referência** em `ferramentas-ia/harness-engineering/{guides,sensores,hooks}/codigo-exemplo/`:
+   - 📄 `CLAUDE.md` de referência para o projeto de apoio
+   - 🏛️ Fitness function pronta validando uma regra de arquitetura
+   - 🪝 `settings.json` + scripts conectando guide e sensor via hook
 
 ### 💡 Dicas de Estudo:
 - ⏰ **Sequencial**: Faça os exercícios em ordem

@@ -7,6 +7,7 @@ Este agrupamento cobre ferramentas e metodologias que utilizam **Inteligência A
 | Ferramenta | Descrição | Status |
 |---|---|---|
 | 🔧 [spec-kit](./spec-kit/) | Spec-Driven Development com GitHub Copilot | ✅ Disponível |
+| 🧰 [harness-engineering](./harness-engineering/) | O que compõe um agente de IA além do modelo — guides, sensores e hooks | ✅ Disponível |
 
 ## 💡 Por Que Ferramentas de IA?
 
@@ -24,6 +25,8 @@ ferramenta/
 ├── exercicios/      # Prática guiada com objetivos claros
 └── codigo-exemplo/  # Artefatos e exemplos prontos para referência
 ```
+
+`harness-engineering` é um tópico com subdivisões — a mesma estrutura se repete uma vez para cada subdivisão (`guides/`, `sensores/`, `hooks/`); veja `harness-engineering/README.md` para o índice completo.
 
 ## 🚀 Próximas Ferramentas
 

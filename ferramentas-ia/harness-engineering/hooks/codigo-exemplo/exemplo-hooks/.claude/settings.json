@@ -1,0 +1,20 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "powershell -NoProfile -File ./scripts/guide-guardrail.ps1" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "powershell -NoProfile -File ./scripts/sensor-fitness-arquitetural.ps1" }
+        ]
+      }
+    ]
+  }
+}
