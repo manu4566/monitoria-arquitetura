@@ -116,13 +116,8 @@ Se você salvou a spec original antes do clarify, abra os dois no VS Code com `C
 
 **Questões para refletir:**
 - Quantas decisões foram tomadas implicitamente na spec inicial?
-Primeiro q ele dividiu em 4 estória, por ser um feature, e nelas há coisas mais coisas mais complexas além do que foi dito, mas ainda sim não passou pelas questões do clarify
-
 - Alguma decisão tomada pelo Copilot você discordaria?
-Acho q talvez a complexidade para um exercicio base, no constituition ele complicou bastante o pedido. Mas acho justo, pois o comando era bem amplo.
-
 - O que teria acontecido se você tivesse implementado a spec inicial sem clarificar?
-Provavelmente ele iria supor algumas coisas.
 
 ### 3.2 Teste de leitura
 
@@ -148,16 +143,16 @@ Anote suas respostas (pode ser no próprio repositório ou no seu bloco de notas
 
 ## ✅ Critérios de Sucesso
 
-- [x] `spec.md` criada em `.specify/specs/avaliacao-exercicios/`
-- [x] `/speckit.clarify` executado ao menos uma vez com perguntas reais
-- [x] Spec atualizada com as decisões do clarify
-- [x] Todos os critérios de aceite são mensuráveis (sem "deve ser rápido", "deve ser fácil")
-- [x] O escopo está explicitamente definido (o que está fora)
-- [x] Você consegue explicar qualquer decisão na spec sem precisar "adivinhar"
+- [ ] `spec.md` criada em `.specify/specs/avaliacao-exercicios/`
+- [ ] `/speckit.clarify` executado ao menos uma vez com perguntas reais
+- [ ] Spec atualizada com as decisões do clarify
+- [ ] Todos os critérios de aceite são mensuráveis (sem "deve ser rápido", "deve ser fácil")
+- [ ] O escopo está explicitamente definido (o que está fora)
+- [ ] Você consegue explicar qualquer decisão na spec sem precisar "adivinhar"
 
 ---
 
-## 🔍 Desafio Adicional [A Fazer Ainda]
+## 🔍 Desafio Adicional
 
 Tente fazer o mesmo exercício com um requisito de **outra área** que você conhece:
 - Um sistema de agendamento de reuniões
